@@ -1,6 +1,8 @@
 import { Component, Input, ViewChild, NgZone, OnInit } from '@angular/core';
 import { MapsAPILoader, AgmMap } from '@agm/core';
 import { GoogleMapsAPIWrapper } from '@agm/core/services';
+import { DataService } from '../data.service';
+import { Observable } from 'rxjs';
 
 declare var google: any;
 
@@ -8,7 +10,6 @@ interface Marker {
   lat: number;
   lng: number;
   label?: string;
-  draggable: boolean;
 }
 
 interface Location {
@@ -21,7 +22,7 @@ interface Location {
   address_country?: string;
   address_zip?: string;
   address_state?: string;
-  marker?: Marker;
+  markers: Object;
 }
 
 @Component({
@@ -30,9 +31,16 @@ interface Location {
   styleUrls: ['./map.component.scss']
 })
 
+
+
+
 export class MapComponent implements OnInit {
 
-  constructor(public mapsApiLoader: MapsAPILoader,
+  users$: Object;
+
+  constructor(
+              private data: DataService,
+              public mapsApiLoader: MapsAPILoader,
               private zone: NgZone,
               private wrapper: GoogleMapsAPIWrapper) {
     this.mapsApiLoader = mapsApiLoader;
@@ -44,20 +52,26 @@ export class MapComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.location.marker.draggable = true;
+    this.data.getUsers().subscribe(
+        data => this.users$ = data
+    );
   }
 
   geocoder:any;
+
   public location:Location = {
-    lat: 51.678418,
-    lng: 7.809007,
-    marker: {
-      lat: 51.678418,
-      lng: 7.809007,
-      draggable: true
-    },
-    zoom: 5
+    lat: -37.3159,
+    lng: 81.1497,
+    markers:[
+              { name_room : 'Name2', lat : -7.025253, long:107.519760},
+              { name_room : 'Name2', lat : -10, long:100}],
+    zoom: 5,
+    title: 'hello'
   };
+
+  private convertStringToNumber(value: string): number {
+    return +value;
+  }
 
   updateOnMap() {
     let full_address:string = this.location.address_level_1 || ""
@@ -111,7 +125,7 @@ export class MapComponent implements OnInit {
           this.location.lng = results[0].geometry.location.lng();
           this.location.marker.lat = results[0].geometry.location.lat();
           this.location.marker.lng = results[0].geometry.location.lng();
-          this.location.marker.draggable = true;
+          this.location.marker.draggable = false;
           this.location.viewport = results[0].geometry.viewport;
         }
 
@@ -120,12 +134,6 @@ export class MapComponent implements OnInit {
         alert("Sorry, this search produced no results.");
       }
     })
-  }
-
-  markerDragEnd(m: any, $event: any) {
-    this.location.marker.lat = m.coords.lat;
-    this.location.marker.lng = m.coords.lng;
-    this.findAddressByCoordinates();
   }
 
   findAddressByCoordinates() {
