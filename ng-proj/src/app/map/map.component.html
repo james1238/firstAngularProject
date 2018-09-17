@@ -1,11 +1,18 @@
 <agm-map [(latitude)]="location.lat" [(longitude)]="location.lng" [(zoom)]="location.zoom" [disableDefaultUI]="true" [zoomControl]="true" [(fitBounds)]='location.viewport'>
   <agm-marker [(latitude)]="location.lat" [(longitude)]="location.lng" title="location.label"></agm-marker>
-  <agm-marker *ngFor="let data of users$; let i = index" [latitude]="convertStringToNumber(data.address.geo.lat)" [longitude]="convertStringToNumber(data.address.geo.lng)" ></agm-marker>
+  <agm-marker *ngFor="let data of events$ | paginate: { itemsPerPage: 10, currentPage: p }; let i = index" [latitude]="convertStringToNumber(data.latitude)" [longitude]="convertStringToNumber(data.longitude)" >
+    <agm-info-window>
+      <b>{{data.name}}</b>
+      <br/>
+      <a href="{{data.url}}">Web Link</a>
+    </agm-info-window>
+  </agm-marker>
 </agm-map>
 
-<div *ngFor="let data of users$; let i = index">
-  {{ convertStringToNumber(data.address.geo.lat) }}
-  {{ data.address.geo.lng}}
+<pagination-controls (pageChange)="p = $event"></pagination-controls>
+
+<div *ngFor="let data of events$ | paginate: { itemsPerPage: 10, currentPage: p }">
+  {{ data.name }}
 </div>
 
 
