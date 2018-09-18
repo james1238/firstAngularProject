@@ -76,6 +76,60 @@ export class MapComponent implements OnInit {
     });
   }
 
+  styles = [
+    {
+      "featureType": "all",
+      "stylers": [
+        {
+          "saturation": 0
+        },
+        {
+          "hue": "#e7ecf0"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "stylers": [
+        {
+          "saturation": -70
+        }
+      ]
+    },
+    {
+      "featureType": "transit",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "stylers": [
+        {
+          "visibility": "simplified"
+        },
+        {
+          "saturation": -60
+        }
+      ]
+    }
+  ];
+
+
+  formatDate(obj) {
+    return obj.replace(/\s/g, "T");
+  }
+
   p: number = 1;
   hightlightStatus: Array<boolean> = [];
   wrapperClass: 'split';
@@ -92,6 +146,7 @@ export class MapComponent implements OnInit {
     lng: 3.4360,
     zoom: 5
   };
+
 
   private convertStringToNumber(value: string): number {
     return +value;

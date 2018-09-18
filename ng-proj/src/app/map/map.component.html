@@ -1,13 +1,13 @@
 <div [class]="wrapperClass" id="mapWrap">
   <div class="fixed">
-  <agm-map [(latitude)]="location.lat" [(longitude)]="location.lng" [(zoom)]="location.zoom" [disableDefaultUI]="true" [zoomControl]="true" [(fitBounds)]='location.viewport'>
+  <agm-map [(latitude)]="location.lat" [(longitude)]="location.lng" [(zoom)]="location.zoom" [disableDefaultUI]="true" [zoomControl]="true" [(fitBounds)]='location.viewport' [styles]="styles">
     <agm-marker *ngFor="let data of events$ | paginate: { itemsPerPage: 25, currentPage: p }; let i = index" [latitude]="convertStringToNumber(data.latitude)" [longitude]="convertStringToNumber(data.longitude)" >
       <agm-info-window>
         <div class="mapInfo">
         <b>{{ data.name }}</b> <img class="thumb" style="max-width: 90px" ng-if='data.logo!==undefined' src="{{data.logo}}"/>
           <br/>
 
-          <b>Date:</b> {{ data.startDate | date:'short' }}<br/>
+          <b>Date:</b> {{ formatDate(data.startDate) | date:'short' }}<br/>
           <span ng-if='data.level!==undefined'><b>Difficulty:</b> {{ data.level }}</span>
           <a ng-if='data.url!==undefined' style="display: block" target="_blank" href="{{data.url}}">Visit Website</a>
         </div>
@@ -22,7 +22,7 @@
       <div class="hideShow">
        <p> <img class="thumb" ng-if='data.logo!==undefined' src="{{data.logo}}"/>{{ data.description }}</p>
 
-       <p><b>Date:</b> {{ data.startDate | date:'medium' }}</p>
+       <p><b>Date:</b> {{ formatDate(data.startDate)|date:'medium' }}</p>
 
         <p ng-if='data.level!==undefined'><b>Difficulty:</b> {{ data.level }}</p>
       <br/>
