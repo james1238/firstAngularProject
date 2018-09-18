@@ -4,6 +4,8 @@ import { GoogleMapsAPIWrapper } from '@agm/core/services';
 import { DataService } from '../data.service';
 import { Observable } from 'rxjs';
 
+import { trigger,style,transition,animate,keyframes,query,stagger } from '@angular/animations';
+
 declare var google: any;
 
 interface Marker {
@@ -27,7 +29,34 @@ interface Location {
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.scss']
+  styleUrls: ['./map.component.scss'],
+
+  // Add this:
+  animations: [
+    trigger('listStagger', [
+      transition('* <=> *', [
+        query(
+            ':enter',
+            [
+              style({ opacity: 0, transform: 'translateY(-15px)' }),
+              stagger(
+                  '50ms',
+                  animate(
+                      '550ms ease-out',
+                      style({ opacity: 1, transform: 'translateY(0px)' })
+                  )
+              )
+            ],
+            { optional: true }
+        ),
+        query(':leave', animate('50ms', style({ opacity: 0 })), {
+          optional: true
+        })
+      ])
+    ])
+
+  ]
+
 })
 
 export class MapComponent implements OnInit {
@@ -48,14 +77,15 @@ export class MapComponent implements OnInit {
   }
 
   p: number = 1;
+  hightlightStatus: Array<boolean> = [];
+  wrapperClass: 'split';
+  geocoder:any;
 
   ngOnInit() {
     this.data.getEvents().subscribe(
         data => this.events$ = data
     );
   }
-
-  geocoder:any;
 
   public location:Location = {
     lat: 55.3781,
@@ -67,68 +97,17 @@ export class MapComponent implements OnInit {
     return +value;
   }
 
-  updateOnMap() {
-    let full_address:string = this.location.address_level_1 || ""
-    if (this.location.address_level_2) full_address = full_address + " " + this.location.address_level_2
-    if (this.location.address_state) full_address = full_address + " " + this.location.address_state
-    if (this.location.address_country) full_address = full_address + " " + this.location.address_country
+  state: string = 'inactive';
 
-    //this.findLocation(full_address);
+  setClass(newClass) {
+    this.wrapperClass = newClass;
   }
 
-  findLocation(address) {
-    if (!this.geocoder) this.geocoder = new google.maps.Geocoder()
-    this.geocoder.geocode({
-      'address': address
-    }, (results, status) => {
-      console.log(results);
-      if (status == google.maps.GeocoderStatus.OK) {
-        // decompose the result
-      } else {
-        alert("Sorry, this search produced no results.");
-      }
-    })
+  updateOnMap(id) {
+    this.location.lat = this.convertStringToNumber(this.events$[id].latitude);
+    this.location.lng = this.convertStringToNumber(this.events$[id].longitude);
+    this.location.zoom = 17;
   }
-
-
-
-  decomposeAddressComponents(addressArray) {
-    if (addressArray.length == 0) return false;
-    let address = addressArray[0].address_components;
-
-    for(let element of address) {
-      if (element.length == 0 && !element['types']) continue
-
-      if (element['types'].indexOf('street_number') > -1) {
-        this.location.address_level_1 = element['long_name'];
-        continue;
-      }
-      if (element['types'].indexOf('route') > -1) {
-        this.location.address_level_1 += ', ' + element['long_name'];
-        continue;
-      }
-      if (element['types'].indexOf('locality') > -1) {
-        this.location.address_level_2 = element['long_name'];
-        continue;
-      }
-      if (element['types'].indexOf('administrative_area_level_1') > -1) {
-        this.location.address_state = element['long_name'];
-        continue;
-      }
-      if (element['types'].indexOf('country') > -1) {
-        this.location.address_country = element['long_name'];
-        continue;
-      }
-      if (element['types'].indexOf('postal_code') > -1) {
-        this.location.address_zip = element['long_name'];
-        continue;
-      }
-    }
-  }
-
-
-
-
 
   @ViewChild(AgmMap) map: AgmMap;
 }
