@@ -13,7 +13,7 @@ export class DataService {
   }
 
   getEvents() {
-    return this.http.get('http://json.j/actions/jsonProcessor/getEntries')
+    return this.http.get('http://api.jamesbarnard.xyz/actions/jsonProcessor/getEntries')
   }
 
   getMapStyling() {
